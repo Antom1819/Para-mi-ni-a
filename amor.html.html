@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>💖 Para Karolay</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Dancing Script', cursive;
+            position: relative;
+        }
+
+        #scene1 {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ffc3e1 0%, #e8c9f5 40%, #ffffff 70%, #ffd89b 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #scene2 {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ffe5ec 0%, #ffd4e5 40%, #fff5e1 70%, #ffe8cc 100%);
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        #scene2.active {
+            opacity: 1;
+            pointer-events: all;
+            animation: fadeIn 1.5s ease;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #musicButton {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.7);
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        #musicButton:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: scale(1.1);
+        }
+
+        #question {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            opacity: 0;
+            z-index: 10;
+        }
+
+        #question.show {
+            animation: scaleUp 1s ease forwards;
+        }
+
+        #question h1 {
+            font-family: 'Great Vibes', cursive;
+            font-size: 42px;
+            color: #ff1493;
+            text-shadow: 2px 2px 8px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 20, 147, 0.3);
+            margin-bottom: 40px;
+            line-height: 1.4;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        button.choice {
+            padding: 18px 45px;
+            font-size: 24px;
+            font-family: 'Dancing Script', cursive;
+            font-weight: 700;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        #yesBtn {
+            background: linear-gradient(135deg, #ff6b9d 0%, #c94e7a 100%);
+            color: white;
+        }
+
+        #yesBtn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.4);
+        }
+
+        #noBtn {
+            background: linear-gradient(135deg, #d3d3d3 0%, #a8a8a8 100%);
+            color: white;
+        }
+
+        #noBtn:hover {
+            transform: scale(1.02);
+        }
+
+        #warningText {
+            font-size: 28px;
+            color: #ff1493;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.9), 
+                         -1px -1px 2px rgba(0, 0, 0, 0.3);
+            margin-top: 20px;
+            opacity: 0;
+            font-weight: 700;
+        }
+
+        #warningText.show {
+            animation: popIn 0.5s ease forwards;
+        }
+
+        #finalMessage {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            opacity: 0;
+            z-index: 20;
+        }
+
+        #finalMessage.show {
+            animation: fadeIn 2s ease forwards;
+        }
+
+        #finalMessage h1 {
+            font-family: 'Great Vibes', cursive;
+            font-size: 48px;
+            color: #ff1493;
+            text-shadow: 2px 2px 10px rgba(255, 255, 255, 0.9), 0 0 30px rgba(255, 20, 147, 0.5);
+            line-height: 1.5;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 30px;
+            opacity: 0;
+            animation: floatHeart 4s ease-in-out infinite;
+        }
+
+        @keyframes scaleUp {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes popIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes floatHeart {
+            0% {
+                opacity: 0;
+                transform: translateY(0) rotate(0deg);
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-80vh) rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <audio id="music" src="https://filesamples.com/samples/audio/mp3/sample3.mp3" loop></audio>
+    
+    <button id="musicButton">🎵</button>
+
+    <div id="scene1">
+        <canvas id="rosesCanvas"></canvas>
+        
+        <div id="question">
+            <h1>💖 ¿Quieres una vida<br>completa conmigo,<br>Karolay?</h1>
+            <div class="buttons">
+                <button id="yesBtn" class="choice">✅ Sí</button>
+                <button id="noBtn" class="choice">❌ No</button>
+            </div>
+            <div id="warningText"></div>
+        </div>
+    </div>
+
+    <div id="scene2">
+        <canvas id="tulipsCanvas"></canvas>
+        <div id="finalMessage">
+            <h1>💍 Te amo Mi Niña,<br>una vida juntos nos <br>espera 💖</h1>
+        </div>
+    </div>
+
+    <script>
+        const music = document.getElementById('music');
+        const musicButton = document.getElementById('musicButton');
+        const scene1 = document.getElementById('scene1');
+        const scene2 = document.getElementById('scene2');
+        const question = document.getElementById('question');
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const warningText = document.getElementById('warningText');
+        const finalMessage = document.getElementById('finalMessage');
+        
+        let musicPlaying = false;
+        let userInteracted = false;
+        let noClickCount = 0;
+
+        // Música
+        musicButton.addEventListener('click', () => {
+            userInteracted = true;
+            if (musicPlaying) {
+                music.pause();
+                musicButton.textContent = '🎵';
+            } else {
+                music.play();
+                musicButton.textContent = '🔇';
+            }
+            musicPlaying = !musicPlaying;
+        });
+
+        // Canvas Rosas con efecto de crecimiento
+        const rosesCanvas = document.getElementById('rosesCanvas');
+        const rCtx = rosesCanvas.getContext('2d');
+        rosesCanvas.width = window.innerWidth;
+        rosesCanvas.height = window.innerHeight;
+
+        class Rose {
+            constructor(x, y, delay) {
+                this.x = x;
+                this.y = y;
+                this.growth = 0;
+                this.delay = delay;
+                this.startTime = Date.now();
+                this.swayOffset = Math.random() * Math.PI * 2;
+                this.swaySpeed = 0.02 + Math.random() * 0.01;
+                this.maxGrowth = 1;
+            }
+
+            update() {
+                const elapsed = (Date.now() - this.startTime - this.delay) / 1000;
+                if (elapsed > 0) {
+                    this.growth = Math.min(this.maxGrowth, elapsed / 3);
+                }
+            }
+
+            draw() {
+                if (this.growth <= 0) return;
+
+                const time = Date.now() * 0.001;
+                const sway = Math.sin(time * this.swaySpeed + this.swayOffset) * 3 * this.growth;
+                
+                rCtx.save();
+                rCtx.translate(this.x + sway, this.y);
+                
+                const stemHeight = -120 * this.growth;
+                
+                // Tallo con textura
+                const stemGradient = rCtx.createLinearGradient(-2, 0, 2, 0);
+                stemGradient.addColorStop(0, '#1a3d0f');
+                stemGradient.addColorStop(0.5, '#2d5016');
+                stemGradient.addColorStop(1, '#1a3d0f');
+                rCtx.strokeStyle = stemGradient;
+                rCtx.lineWidth = 4;
+                rCtx.lineCap = 'round';
+                rCtx.beginPath();
+                rCtx.moveTo(0, 0);
+                rCtx.quadraticCurveTo(-3, stemHeight / 2, 0, stemHeight);
+                rCtx.stroke();
+                
+                // Espinas
+                if (this.growth > 0.3) {
+                    rCtx.strokeStyle = '#1a3d0f';
+                    rCtx.lineWidth = 2;
+                    for (let i = 0; i < 5; i++) {
+                        const spineY = (stemHeight / 6) * i;
+                        rCtx.beginPath();
+                        rCtx.moveTo(-2, spineY);
+                        rCtx.lineTo(-6, spineY - 4);
+                        rCtx.stroke();
+                    }
+                }
+                
+                // Hojas con detalle
+                if (this.growth > 0.4) {
+                    const leafGrowth = (this.growth - 0.4) / 0.6;
+                    
+                    // Hoja izquierda
+                    rCtx.fillStyle = '#3d6b29';
+                    rCtx.beginPath();
+                    rCtx.ellipse(-15, stemHeight * 0.4, 12 * leafGrowth, 20 * leafGrowth, -Math.PI / 3, 0, Math.PI * 2);
+                    rCtx.fill();
+                    
+                    rCtx.fillStyle = '#4a7c2d';
+                    rCtx.beginPath();
+                    rCtx.ellipse(-13, stemHeight * 0.4, 9 * leafGrowth, 16 * leafGrowth, -Math.PI / 3, 0, Math.PI * 2);
+                    rCtx.fill();
+                    
+                    // Hoja derecha
+                    rCtx.fillStyle = '#3d6b29';
+                    rCtx.beginPath();
+                    rCtx.ellipse(15, stemHeight * 0.6, 12 * leafGrowth, 20 * leafGrowth, Math.PI / 3, 0, Math.PI * 2);
+                    rCtx.fill();
+                    
+                    rCtx.fillStyle = '#4a7c2d';
+                    rCtx.beginPath();
+                    rCtx.ellipse(13, stemHeight * 0.6, 9 * leafGrowth, 16 * leafGrowth, Math.PI / 3, 0, Math.PI * 2);
+                    rCtx.fill();
+                }
+                
+                // Rosa con pétalos realistas
+                if (this.growth > 0.5) {
+                    const roseGrowth = (this.growth - 0.5) / 0.5;
+                    rCtx.translate(0, stemHeight);
+                    
+                    const openness = Math.min(1, roseGrowth * 1.5);
+                    
+                    // Cáliz verde
+                    rCtx.fillStyle = '#2d5016';
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (Math.PI * 2 / 5) * i;
+                        rCtx.save();
+                        rCtx.rotate(angle);
+                        rCtx.beginPath();
+                        rCtx.ellipse(0, 8, 4 * roseGrowth, 10 * roseGrowth, 0, 0, Math.PI * 2);
+                        rCtx.fill();
+                        rCtx.restore();
+                    }
+                    
+                    // Pétalos externos (capa 1)
+                    for (let i = 0; i < 8; i++) {
+                        const angle = (Math.PI * 2 / 8) * i;
+                        rCtx.save();
+                        rCtx.rotate(angle);
+                        
+                        const gradient1 = rCtx.createRadialGradient(0, -15 * openness, 0, 0, -15 * openness, 15 * roseGrowth);
+                        gradient1.addColorStop(0, '#ffb3d9');
+                        gradient1.addColorStop(0.5, '#ff69b4');
+                        gradient1.addColorStop(1, '#ff1493');
+                        rCtx.fillStyle = gradient1;
+                        
+                        rCtx.beginPath();
+                        rCtx.ellipse(0, -15 * openness, 10 * roseGrowth, 18 * roseGrowth, Math.PI * 0.2, 0, Math.PI * 2);
+                        rCtx.fill();
+                        
+                        // Sombra del pétalo
+                        rCtx.fillStyle = 'rgba(199, 21, 133, 0.2)';
+                        rCtx.beginPath();
+                        rCtx.ellipse(0, -15 * openness, 8 * roseGrowth, 14 * roseGrowth, Math.PI * 0.2, 0, Math.PI);
+                        rCtx.fill();
+                        
+                        rCtx.restore();
+                    }
+                    
+                    // Pétalos medios (capa 2)
+                    for (let i = 0; i < 6; i++) {
+                        const angle = (Math.PI * 2 / 6) * i + Math.PI / 6;
+                        rCtx.save();
+                        rCtx.rotate(angle);
+                        
+                        const gradient2 = rCtx.createRadialGradient(0, -8 * openness, 0, 0, -8 * openness, 12 * roseGrowth);
+                        gradient2.addColorStop(0, '#ffd9ec');
+                        gradient2.addColorStop(0.5, '#ff85c1');
+                        gradient2.addColorStop(1, '#ff1493');
+                        rCtx.fillStyle = gradient2;
+                        
+                        rCtx.beginPath();
+                        rCtx.ellipse(0, -8 * openness, 8 * roseGrowth, 14 * roseGrowth, Math.PI * 0.15, 0, Math.PI * 2);
+                        rCtx.fill();
+                        rCtx.restore();
+                    }
+                    
+                    // Pétalos internos (capa 3)
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (Math.PI * 2 / 5) * i;
+                        rCtx.save();
+                        rCtx.rotate(angle);
+                        
+                        const gradient3 = rCtx.createRadialGradient(0, -3 * openness, 0, 0, -3 * openness, 8 * roseGrowth);
+                        gradient3.addColorStop(0, '#ffecf5');
+                        gradient3.addColorStop(0.6, '#ff9dc6');
+                        gradient3.addColorStop(1, '#ff69b4');
+                        rCtx.fillStyle = gradient3;
+                        
+                        rCtx.beginPath();
+                        rCtx.ellipse(0, -3 * openness, 6 * roseGrowth, 10 * roseGrowth, Math.PI * 0.1, 0, Math.PI * 2);
+                        rCtx.fill();
+                        rCtx.restore();
+                    }
+                    
+                    // Centro de la rosa
+                    const centerGradient = rCtx.createRadialGradient(0, 0, 0, 0, 0, 6 * roseGrowth);
+                    centerGradient.addColorStop(0, '#fff0f8');
+                    centerGradient.addColorStop(0.5, '#ffb3d9');
+                    centerGradient.addColorStop(1, '#ff69b4');
+                    rCtx.fillStyle = centerGradient;
+                    rCtx.beginPath();
+                    rCtx.arc(0, 0, 6 * roseGrowth, 0, Math.PI * 2);
+                    rCtx.fill();
+                    
+                    // Estambres
+                    rCtx.strokeStyle = '#ffd700';
+                    rCtx.lineWidth = 1;
+                    for (let i = 0; i < 8; i++) {
+                        const angle = (Math.PI * 2 / 8) * i;
+                        rCtx.beginPath();
+                        rCtx.moveTo(0, 0);
+                        rCtx.lineTo(Math.cos(angle) * 4 * roseGrowth, Math.sin(angle) * 4 * roseGrowth);
+                        rCtx.stroke();
+                        
+                        rCtx.fillStyle = '#ffed4e';
+                        rCtx.beginPath();
+                        rCtx.arc(Math.cos(angle) * 4 * roseGrowth, Math.sin(angle) * 4 * roseGrowth, 1.5, 0, Math.PI * 2);
+                        rCtx.fill();
+                    }
+                }
+                
+                rCtx.restore();
+            }
+        }
+
+        const roses = [];
+        const positions = [
+            [rosesCanvas.width * 0.2, rosesCanvas.height - 80],
+            [rosesCanvas.width * 0.4, rosesCanvas.height - 100],
+            [rosesCanvas.width * 0.6, rosesCanvas.height - 90],
+            [rosesCanvas.width * 0.8, rosesCanvas.height - 95]
+        ];
+
+        positions.forEach((pos, i) => {
+            roses.push(new Rose(pos[0], pos[1], i * 500));
+        });
+
+        function animateRoses() {
+            rCtx.clearRect(0, 0, rosesCanvas.width, rosesCanvas.height);
+            
+            let allGrown = true;
+            roses.forEach(rose => {
+                rose.update();
+                rose.draw();
+                if (rose.growth < rose.maxGrowth) allGrown = false;
+            });
+            
+            requestAnimationFrame(animateRoses);
+            
+            if (allGrown && !question.classList.contains('show')) {
+                setTimeout(() => {
+                    question.classList.add('show');
+                    if (!userInteracted) {
+                        music.play().catch(() => {});
+                        musicPlaying = true;
+                        musicButton.textContent = '🔇';
+                    }
+                }, 1000);
+            }
+        }
+
+        animateRoses();
+
+        // Botón NO
+        noBtn.addEventListener('click', () => {
+            noClickCount++;
+            
+            warningText.textContent = '¿Estás segura?';
+            warningText.classList.remove('show');
+            void warningText.offsetWidth;
+            warningText.classList.add('show');
+            
+            const newScale = 1 + (noClickCount * 0.2);
+            yesBtn.style.transform = `scale(${newScale})`;
+        });
+
+        // Botón SÍ
+        yesBtn.addEventListener('click', () => {
+            scene1.style.transition = 'opacity 1.5s';
+            scene1.style.opacity = '0';
+            
+            setTimeout(() => {
+                scene2.classList.add('active');
+                createHearts();
+                setTimeout(() => {
+                    startTulipAnimation();
+                }, 500);
+            }, 1500);
+        });
+
+        // Canvas Tulipanes
+        const tulipsCanvas = document.getElementById('tulipsCanvas');
+        const tCtx = tulipsCanvas.getContext('2d');
+        tulipsCanvas.width = window.innerWidth;
+        tulipsCanvas.height = window.innerHeight;
+
+        class Tulip {
+            constructor(x, y, color, delay) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.growth = 0;
+                this.delay = delay;
+                this.startTime = Date.now();
+            }
+
+            update() {
+                const elapsed = (Date.now() - this.startTime - this.delay) / 1000;
+                if (elapsed > 0) {
+                    this.growth = Math.min(1, elapsed / 2.5);
+                }
+            }
+
+            draw() {
+                if (this.growth <= 0) return;
+                
+                tCtx.save();
+                tCtx.translate(this.x, this.y);
+                
+                const stemHeight = -100 * this.growth;
+                
+                // Tallo
+                const stemGradient = tCtx.createLinearGradient(-2, 0, 2, 0);
+                stemGradient.addColorStop(0, '#1a3d0f');
+                stemGradient.addColorStop(0.5, '#2d5016');
+                stemGradient.addColorStop(1, '#1a3d0f');
+                tCtx.strokeStyle = stemGradient;
+                tCtx.lineWidth = 5;
+                tCtx.lineCap = 'round';
+                tCtx.beginPath();
+                tCtx.moveTo(0, 0);
+                tCtx.lineTo(0, stemHeight);
+                tCtx.stroke();
+                
+                // Hojas
+                if (this.growth > 0.3) {
+                    const leafGrowth = (this.growth - 0.3) / 0.7;
+                    
+                    // Hoja izquierda
+                    tCtx.fillStyle = '#3d6b29';
+                    tCtx.beginPath();
+                    tCtx.ellipse(-12, stemHeight * 0.5, 8 * leafGrowth, 25 * leafGrowth, -Math.PI / 5, 0, Math.PI * 2);
+                    tCtx.fill();
+                    
+                    tCtx.fillStyle = '#4a7c2d';
+                    tCtx.beginPath();
+                    tCtx.ellipse(-10, stemHeight * 0.5, 6 * leafGrowth, 22 * leafGrowth, -Math.PI / 5, 0, Math.PI * 2);
+                    tCtx.fill();
+                    
+                    // Hoja derecha
+                    tCtx.fillStyle = '#3d6b29';
+                    tCtx.beginPath();
+                    tCtx.ellipse(12, stemHeight * 0.65, 8 * leafGrowth, 25 * leafGrowth, Math.PI / 5, 0, Math.PI * 2);
+                    tCtx.fill();
+                    
+                    tCtx.fillStyle = '#4a7c2d';
+                    tCtx.beginPath();
+                    tCtx.ellipse(10, stemHeight * 0.65, 6 * leafGrowth, 22 * leafGrowth, Math.PI / 5, 0, Math.PI * 2);
+                    tCtx.fill();
+                }
+                
+                // Tulipán
+                if (this.growth > 0.4) {
+                    const flowerGrowth = (this.growth - 0.4) / 0.6;
+                    tCtx.translate(0, stemHeight);
+                    
+                    const openness = Math.min(1, flowerGrowth * 1.2);
+                    
+                    // Base del tulipán
+                    tCtx.fillStyle = '#2d5016';
+                    tCtx.beginPath();
+                    tCtx.ellipse(0, 5, 6 * flowerGrowth, 8 * flowerGrowth, 0, 0, Math.PI * 2);
+                    tCtx.fill();
+                    
+                    // Pétalos externos
+                    for (let i = 0; i < 6; i++) {
+                        const angle = (Math.PI * 2 / 6) * i;
+                        tCtx.save();
+                        tCtx.rotate(angle);
+                        tCtx.translate(0, -openness * 10);
+                        
+                        const petalGradient = tCtx.createRadialGradient(0, -12, 0, 0, -12, 20 * flowerGrowth);
+                        petalGradient.addColorStop(0, this.lightenColor(this.color));
+                        petalGradient.addColorStop(0.6, this.color);
+                        petalGradient.addColorStop(1, this.darkenColor(this.color));
+                        tCtx.fillStyle = petalGradient;
+                        
+                        tCtx.beginPath();
+                        tCtx.ellipse(0, -12, 12 * flowerGrowth, 22 * flowerGrowth, 0, 0, Math.PI * 2);
+                        tCtx.fill();
+                        
+                        // Detalles del pétalo
+                        tCtx.strokeStyle = this.darkenColor(this.color);
+                        tCtx.lineWidth = 0.5;
+                        tCtx.beginPath();
+                        tCtx.moveTo(0, -5);
+                        tCtx.lineTo(0, -20);
+                        tCtx.stroke();
+                        
+                        // Sombra interna
+                        tCtx.fillStyle = `rgba(0, 0, 0, 0.1)`;
+                        tCtx.beginPath();
+                        tCtx.ellipse(0, -12, 8 * flowerGrowth, 16 * flowerGrowth, 0, 0, Math.PI);
+                        tCtx.fill();
+                        
+                        tCtx.restore();
+                    }
+                    
+                    // Centro del tulipán
+                    const centerGradient = tCtx.createRadialGradient(0, 0, 0, 0, 0, 8 * flowerGrowth);
+                    centerGradient.addColorStop(0, '#ffd700');
+                    centerGradient.addColorStop(0.5, '#ffed4e');
+                    centerGradient.addColorStop(1, '#daa520');
+                    tCtx.fillStyle = centerGradient;
+                    tCtx.beginPath();
+                    tCtx.arc(0, 0, 8 * flowerGrowth, 0, Math.PI * 2);
+                    tCtx.fill();
+                    
+                    // Estambres
+                    tCtx.strokeStyle = '#8b6914';
+                    tCtx.lineWidth = 2;
+                    for (let i = 0; i < 6; i++) {
+                        const angle = (Math.PI * 2 / 6) * i;
+                        tCtx.beginPath();
+                        tCtx.moveTo(0, 0);
+                        tCtx.lineTo(Math.cos(angle) * 5 * flowerGrowth, Math.sin(angle) * 5 * flowerGrowth);
+                        tCtx.stroke();
+                        
+                        tCtx.fillStyle = '#2d1f00';
+                        tCtx.beginPath();
+                        tCtx.arc(Math.cos(angle) * 5 * flowerGrowth, Math.sin(angle) * 5 * flowerGrowth, 2, 0, Math.PI * 2);
+                        tCtx.fill();
+                    }
+                }
+                
+                tCtx.restore();
+            }
+
+            lightenColor(color) {
+                const colors = {
+                    '#ff69b4': '#ffb3d9',
+                    '#ffd700': '#ffed4e',
+                    '#ff4500': '#ff7f50',
+                    '#ffffff': '#ffffff',
+                    '#9370db': '#b19cd9',
+                    '#ff1493': '#ff69b4'
+                };
+                return colors[color] || color;
+            }
+
+            darkenColor(color) {
+                const colors = {
+                    '#ff69b4': '#ff1493',
+                    '#ffd700': '#daa520',
+                    '#ff4500': '#cc0000',
+                    '#ffffff': '#f0f0f0',
+                    '#9370db': '#7b68ee',
+                    '#ff1493': '#c71585'
+                };
+                return colors[color] || color;
+            }
+        }
+
+        function startTulipAnimation() {
+            const tulips = [];
+            const colors = ['#ff69b4', '#ffd700', '#ff4500', '#ffffff', '#9370db', '#ff1493'];
+            const positions = [
+                [80, tulipsCanvas.height - 60],
+                [160, tulipsCanvas.height - 80],
+                [240, tulipsCanvas.height - 70],
+                [tulipsCanvas.width - 240, tulipsCanvas.height - 75],
+                [tulipsCanvas.width - 160, tulipsCanvas.height - 85],
+                [tulipsCanvas.width - 80, tulipsCanvas.height - 65]
+            ];
+            
+            positions.forEach((pos, i) => {
+                tulips.push(new Tulip(
+                    pos[0], 
+                    pos[1], 
+                    colors[i % colors.length],
+                    i * 400
+                ));
+            });
+
+            function animate() {
+                tCtx.clearRect(0, 0, tulipsCanvas.width, tulipsCanvas.height);
+                
+                let allGrown = true;
+                tulips.forEach(tulip => {
+                    tulip.update();
+                    tulip.draw();
+                    if (tulip.growth < 1) allGrown = false;
+                });
+                
+                if (allGrown && !finalMessage.classList.contains('show')) {
+                    setTimeout(() => {
+                        finalMessage.classList.add('show');
+                    }, 1000);
+                }
+                
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+
+        function createHearts() {
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.textContent = '💖';
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.top = '100%';
+                heart.style.animationDuration = (3 + Math.random() * 2) + 's';
+                heart.style.animationDelay = Math.random() * 0.5 + 's';
+                scene2.appendChild(heart);
+                
+                setTimeout(() => heart.remove(), 6000);
+            }, 400);
+        }
+
+        // Resize
+        window.addEventListener('resize', () => {
+            rosesCanvas.width = window.innerWidth;
+            rosesCanvas.height = window.innerHeight;
+            tulipsCanvas.width = window.innerWidth;
+            tulipsCanvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
